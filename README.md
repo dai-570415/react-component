@@ -1,68 +1,361 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# 【環境構築】Create React Appの使い方
 
-## Available Scripts
+```bash
+# グローバルインストール
+$ npm install -g create-react-app
 
-In the project directory, you can run:
+# Reactプロジェクト構築(react-basicは任意のプロジェクト名)
+$ create-react-app react-basic
+```
 
-### `npm start`
+```
+プロジェクト構成
+.
+├── .gitignore
+├── README.md
+├── package.json
+├── node_modules
+├── public
+│   ├── favicon.ico
+│   └── index.html
+└── src
+    ├── App.css
+    ├── App.js(子コンポーネント)
+    ├── App.test.js
+    ├── index.css
+    ├── index.js(親コンポーネント)
+    └── logo.svg
+```
 
-Runs the app in the development mode.<br />
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+cssもリセットしておく。
 
-The page will reload if you make edits.<br />
-You will also see any lint errors in the console.
+```css:index.css
+/* 全体のcss */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+```
 
-### `npm test`
+```css:App.css
+/* Appコンポーネントのcss */
+```
 
-Launches the test runner in the interactive watch mode.<br />
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
 
-### `npm run build`
+# Reactコンポーネント
 
-Builds the app for production to the `build` folder.<br />
-It correctly bundles React in production mode and optimizes the build for the best performance.
+```
+└── src
+    ├── App.js(こちらで内容を編集)
+    ├── index.js(最終的に1つのHTMLに出力されるファイル)
+    ├ ...
+```
 
-The build is minified and the filenames include the hashes.<br />
-Your app is ready to be deployed!
+## Functionalコンポーネント と Classコンポーネント
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+コンポーネントには「Functionalコンポーネント」と「Classコンポーネント」の2種類がある。
 
-### `npm run eject`
+### Functionalコンポーネント
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+```jsx:App.js
+const App = () => {
+  return (
+    <div>
+        <p>Hello Dai</p>
+    </div>
+  );
+}
+```
+もともと、stateは使用できなかったが、
+ステートフックというモジュールの導入でこちらでもstateが使用できるようになった。
+こちらは別途まとめる予定。
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### Classコンポーネント
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+特徴としてはstateが使用できる
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+```jsx:App.js
+class App extends React.Component {
+  render() {
+    return (
+      <div>
+          <p>Hello Dai</p>
+      </div>
+    );
+  }
+}
+```
 
-## Learn More
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+### コンポーネント再利用
+index.jsにタグとして再利用することが可能
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+```jsx:index.js
+ReactDOM.render(
+  <React.StrictMode>
+    <App />
+    <App />
+    <App />
+  </React.StrictMode>,
+  document.getElementById('root')
+);
+```
 
-### Code Splitting
+出力結果
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/code-splitting
+```
+Hello Dai
 
-### Analyzing the Bundle Size
+Hello Dai
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size
+Hello Dai
+```
 
-### Making a Progressive Web App
+App.jsを1度変更するだけで一括で変わるので修正作業が簡略化される。
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app
+※`<App />` をエレメントという
 
-### Advanced Configuration
+エレメントは変数に格納して描画することも可能。
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/advanced-configuration
+```jsx:index.js
+// appElementという変数に格納
+const appElement = <App />;
 
-### Deployment
+ReactDOM.render(
+  <React.StrictMode>
+    { appElement }
+  </React.StrictMode>,
+  document.getElementById('root')
+);
+```
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/deployment
 
-### `npm run build` fails to minify
+# Fragmentコンポーネント
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify
+Reactコンポーネントは単一な親の要素でしか表現できない。
+
+コンパイルエラーな例
+
+```jsx:App.js
+const App = () => {
+  return (
+      <p>Hello Dai</p>
+      <p>Hello Dai</p>
+  );
+}
+```
+
+コンパイルOKな例
+
+```jsx:App.js
+const App = () => {
+  return (
+    <div>
+      <p>Hello Dai</p>
+      <p>Hello Dai</p>
+    </div>
+  );
+}
+```
+
+しかし、本来必要じゃない<div>タグをついかしなければならず構造が変わってしまう問題がある。
+
+出力結果
+
+```html
+<div>
+  <p>Hello Dai</p>
+  <p>Hello Dai</p>
+</div>
+```
+
+そこでReact.Fragmentを利用する。
+
+```jsx:App.js
+const App = () => {
+  return (
+    <React.Fragment>
+      <p>Hello Dai</p>
+      <p>Hello Dai</p>
+    </React.Fragment>
+  );
+}
+```
+<React.Fragment>...</React.Fragment>を簡略して
+<>...</>と記述できる
+
+出力結果
+
+```html
+<p>Hello Dai</p>
+<p>Hello Dai</p>
+```
+
+
+# propsで親から子へデータを受け渡す
+
+```jsx:index.js(親)
+ReactDOM.render(
+  <React.StrictMode>
+    <App name="Dai" />
+    <App name="Taro" />
+  </React.StrictMode>,
+  document.getElementById('root')
+);
+```
+nameという任意の値で子へ受け渡すことが可能
+
+```jsx:App.js(子)
+const App = (props) => {
+  return (
+    <React.Fragment>
+      <p>Hello { props.name }</p>
+    </React.Fragment>
+  );
+}
+```
+
+複数の値の受け渡し
+
+```jsx
+<App name="Dai" age={38} />
+// or
+const profile = {
+  name: 'Dai',
+  age: 38,
+  birthday: '1982.4.15',
+}
+
+<App { ...profile } />
+
+// ===================================
+
+const App = (props) => {
+  return (
+    <React.Fragment>
+      <p>Hello { props.name }({ props.age })</p>
+    </React.Fragment>
+  );
+}
+// or
+// オブジェクトスプレット演算子で直接展開可能
+const App = ({ name, age }) => {
+  return (
+    <React.Fragment>
+      <p>Hello { name }({ age })</p>
+    </React.Fragment>
+  );
+}
+```
+
+## propsで受け渡せる値
+
+#### 文字列
+`<App name="Dai" />`
+`<App name={"Dai"} />`
+
+#### 数値
+`<App age={38} />`
+
+#### 真偽値
+`<App render={true} />`
+
+#### 配列
+`<App items={['1', '2', '3']} />`
+
+#### 変数
+`const name = 'Dai';`
+`<App value={name} />`
+
+#### children
+`<App>Dai</App>`
+
+```jsx:App.js
+// childrenで受け取れる
+const App = ({ children }) => {
+  return (
+    <React.Fragment>
+      <p>{ children }</p>
+    </React.Fragment>
+  );
+}
+```
+
+## propsの型チェック
+
+```jsx:App.js
+// 追加
+import PropTypes from 'prop-types';
+
+const App = ({...}) => {...}
+
+App.propTypes = {
+  name:PropTypes.string,
+}
+```
+
+#### 型チェック種類
+文字列: string
+数値: number
+真偽値: bool
+array: 配列
+オブジェクト: object
+関数: func
+シンボル: symbol
+
+
+# 簡易なTodoアプリ
+
+## 機能
+- Todoの追加
+- Todoの削除
+
+## プロジェクト構成
+
+```
+.
+├── .gitignore
+├── README.md
+├── package.json
+├── node_modules
+├── public
+│   ├── favicon.ico
+│   └── index.html
+└── src
+    ├── index.js
+    ├── App.js
+    └── components
+        ├── TodoInput.js
+        ├── TodoList.js
+        └── TodoItem.js
+    └── assets
+        └── css
+            ├── index.css
+            └── App.css
+        └── img
+            └── ...必要ならここに入れていく
+```
+
+●index.js
+最終的にHTMLに返すコンポーネント
+
+●App.js
+アプリ全体を表すコンポーネント
+
+●TodoInput.js
+入力フォームのコンポーネント
+
+●TodoList.js
+一覧を表すコンポーネント
+
+●TodoItem.js
+一つひとつのアイテムを表すコンポーネント
+
+
+## Reactコンポーネントの作成手順
+
+1. UIコンポーネントに分割する
+2.　propsやstateによってどのようにUIが変化するか定義する(JSX)
+3.　ユーザー操作によってどのようにstateが変化するか定義する(メソッド)
+4.　UIとメソッドを紐づける(onClickなどの設定)
