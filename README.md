@@ -307,6 +307,18 @@ array: 配列
 
 # 簡易なTodoアプリ
 
+## プロジェクトダウンロード＆起動
+
+```bash
+$ git clone https://github.com/dai-570415/react-component.git
+
+$ cd react-component
+
+$ npm install
+
+$ npm start
+```
+
 ## 機能
 - Todoの追加
 - Todoの削除
